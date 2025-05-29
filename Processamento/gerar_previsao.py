@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
-from config import MERCADOS  # Lista ordenada de mercados conforme índice
+from Processamento.config import MERCADOS  # Lista ordenada de mercados conforme índice
 
 
 def recomendar_para_novo_usuario(matriz_utilidade: pd.DataFrame, top_n: int = 5) -> pd.DataFrame:
@@ -33,7 +33,7 @@ def recomendar_para_novo_usuario(matriz_utilidade: pd.DataFrame, top_n: int = 5)
     mat = matriz_utilidade.copy()
 
     # Garante que os nomes das colunas são do tipo inteiro (compatível com índice em MERCADOS)
-    mat.columns = mat.columns.astype(int)
+    #mat.columns = mat.columns.astype(int)
 
     # Número de usuários (linhas) e itens (colunas)
     n_users, n_items = mat.shape
@@ -68,10 +68,9 @@ def recomendar_para_novo_usuario(matriz_utilidade: pd.DataFrame, top_n: int = 5)
         'nota_prevista': predicoes
     })
 
-    # Ordena pela nota prevista (decrescente) e retorna os top_n itens
     df_recs = df_recs.sort_values('nota_prevista', ascending=False).head(top_n).reset_index(drop=True)
 
-    # Mapeia os índices dos itens para os nomes reais dos mercados
-    df_recs['nome_mercado'] = df_recs['item_index'].apply(lambda i: MERCADOS[i])
+    # Agora basta:
+    df_recs['nome_mercado'] = df_recs['item_index']
 
     return df_recs

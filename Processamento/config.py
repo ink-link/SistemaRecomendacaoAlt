@@ -48,44 +48,52 @@ SAZONALIDADE = {
     "Tomate": [2,3,5,10]
 }
 
-MERCADOS = [
-    "Afeca  São Sebastião",
-    "Agrifam  Taguatinga",
-    "Agrifam  Gama",
-    "Agrifam  Santa Maria",
-    "Amista  Santa Maria",
-    "Aspaf  Guará",
-    "Aspaf  Núcleo Bandeirante",
-    "Aspaf  Plano Piloto",
-    "AsSpag  Brazlândia",
-    "Asphor  Gama",
-    "Asphor  Santa Maria",
-    "Asphor  Plano Piloto",
-    "Asproc  Ceilândia",
-    "Asproc  Recanto das Emas",
-    "Asproc  Samambaia",
-    "Asproc  Paranoá",
-    "Asproc  Planaltina",
-    "Aspronte  Ceilândia",
-    "Aspronte  Recanto das Emas",
-    "Astraf  Guará",
-    "Coopbrasfil  Gama",
-    "Coopbrasfil  Recanto das Emas",
-    "Coopbrasfil  Samambaia",
-    "Coopbrasfil  Núcleo Bandeirante",
-    "Coopbrasfil  Planaltina",
-    "Coopbrasfil  Brazlândia",
-    "Coopbrasfil  Ceilândia",
-    "Cooper-Horti  Paranoá",
-    "Prorural  Plano Piloto",
-    "Prorural  Paranoá",
-    "Coopebraz  Brazlândia",
-    "Coopebraz  Taguatinga",
-    "Coopebraz  Samambaia",
-    "Coopebraz  Recanto das Emas",
-    "Coopermista  Planaltina",
-    "Rede Terra  Santa Maria",
-    "Cootagua  Ceilândia",
-    "Cooperbrasilia  Sobradinho",
-    "Cooperbrasilia  São Sebastião"
-]
+import pandas as pd
+
+# Carregue o CSV
+df = pd.read_csv("Processamento/coordenadas_associacoes_df.csv")
+
+# Crie a lista de chaves únicas: nome + endereço, padronizados
+MERCADOS = (df['Mercado'].str.strip() + ' ' + df['Endereço'].str.strip()).tolist()
+
+# MERCADOS = [
+#     "Afeca  São Sebastião",
+#     "Agrifam  Taguatinga",
+#     "Agrifam  Gama",
+#     "Agrifam  Santa Maria",
+#     "Amista  Santa Maria",
+#     "Aspaf  Guará",
+#     "Aspaf  Núcleo Bandeirante",
+#     "Aspaf  Plano Piloto",
+#     "AsSpag  Brazlândia",
+#     "Asphor  Gama",
+#     "Asphor  Santa Maria",
+#     "Asphor  Plano Piloto",
+#     "Asproc  Ceilândia",
+#     "Asproc  Recanto das Emas",
+#     "Asproc  Samambaia",
+#     "Asproc  Paranoá",
+#     "Asproc  Planaltina",
+#     "Aspronte  Ceilândia",
+#     "Aspronte  Recanto das Emas",
+#     "Astraf  Guará",
+#     "Coopbrasfil  Gama",
+#     "Coopbrasfil  Recanto das Emas",
+#     "Coopbrasfil  Samambaia",
+#     "Coopbrasfil  Núcleo Bandeirante",
+#     "Coopbrasfil  Planaltina",
+#     "Coopbrasfil  Brazlândia",
+#     "Coopbrasfil  Ceilândia",
+#     "Cooper-Horti  Paranoá",
+#     "Prorural  Plano Piloto",
+#     "Prorural  Paranoá",
+#     "Coopebraz  Brazlândia",
+#     "Coopebraz  Taguatinga",
+#     "Coopebraz  Samambaia",
+#     "Coopebraz  Recanto das Emas",
+#     "Coopermista  Planaltina",
+#     "Rede Terra  Santa Maria",
+#     "Cootagua  Ceilândia",
+#     "Cooperbrasilia  Sobradinho",
+#     "Cooperbrasilia  São Sebastião"
+# ]

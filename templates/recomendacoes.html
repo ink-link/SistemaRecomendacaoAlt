@@ -3,7 +3,21 @@
 <head>
     <title>Recomendações</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>#map { height: 500px; }</style>
+    <style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    #map {
+        height: 100vh;
+        width: 100vw;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 0;
+    }
+</style>
 </head>
 <body>
     <h2>Mercados Recomendados</h2>

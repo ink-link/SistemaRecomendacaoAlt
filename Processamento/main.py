@@ -1,12 +1,13 @@
 import pandas as pd
 import numpy as np
+import unicodedata
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut
 from geopy.distance import geodesic
 
-from config import ITENS_DISPONIVEIS, SAZONALIDADE
-from gerar_previsao import recomendar_para_novo_usuario
-from gerar_matriz import (
+from Processamento.config import ITENS_DISPONIVEIS, SAZONALIDADE
+from Processamento.gerar_previsao import recomendar_para_novo_usuario
+from Processamento.gerar_matriz import (
     gerar_matriz_usuario_item,
     gerar_matriz_item_mercado,
     gerar_matriz_utilidade,
@@ -27,6 +28,99 @@ DISTANCIA = 20
 # FUNÇÕES AUXILIARES
 # =============================================================================
 
+def normalize_str(s):
+    s = str(s).lower().strip().replace(',', '').replace('"', '')
+    s = ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
+    return s
+
+def gerar_recomendacoes(endereco, itens_preferidos, organico, mes_atual, distancia_max_km, latitude=None, longitude=None):
+    print("DEBUG:", endereco, itens_preferidos, organico, mes_atual, distancia_max_km, latitude, longitude)
+    # Se latitude e longitude forem fornecidos, use-os; senão, geocode o endereço
+    if latitude is not None and longitude is not None:
+        user_location = (float(latitude), float(longitude))
+    else:
+        coordenadas = get_coordinates(endereco)
+        if not coordenadas:
+            return []
+        user_location = coordenadas   
+
+    try:
+        df = pd.read_csv("Processamento/coordenadas_associacoes_df.csv")
+        print("DataFrame de coordenadas carregado com sucesso.")
+    except FileNotFoundError:
+        print("[Erro] DataFrame de coordenadas está vazio.")
+        return []
+
+    df["Distance_km"] = df.apply(
+        lambda row: calculate_distance(row["Latitude"], row["Longitude"], user_location),
+        axis=1
+    )
+    df_proximas = df[df["Distance_km"] <= distancia_max_km].sort_values("Distance_km")
+    print("Mercados próximos:", df_proximas)
+    if df_proximas.empty:
+        return []
+
+    itens_preferidos_sazonais = [
+        item for item in itens_preferidos
+        if mes_atual in SAZONALIDADE.get(item, [])
+    ]
+    print("Itens sazonais:", itens_preferidos_sazonais)
+    if not itens_preferidos_sazonais:
+        return []
+
+    # indices_proximos = df_proximas.index.tolist()
+    colunas_proximas = [
+        normalize_str(m) + ' ' + normalize_str(e)
+        for m, e in zip(df_proximas['Mercado'], df_proximas['Endereço'])
+    ]
+    print("Colunas_proximas:", colunas_proximas)
+
+    gerar_matriz_usuario_item(mes=mes_atual, percentual_organico=0.3, num_usuarios=5000)
+    gerar_matriz_item_mercado(mes=mes_atual)
+    gerar_matriz_utilidade()
+    linha_novo_usuario = calcular_utilidade_novo_usuario(
+        itens_preferidos_sazonais, organico, mes=mes_atual
+    ).to_numpy()
+    linha_novo_usuario = np.where(linha_novo_usuario >= 0.3, linha_novo_usuario, 0)
+    try:
+        matriz_utilidade = pd.read_csv("Processamento/matriz_utilidade.csv")
+    except FileNotFoundError:
+        return []
+    matriz_utilidade.loc[len(matriz_utilidade)] = linha_novo_usuario
+    matriz_utilidade.columns = [normalize_str(col) for col in matriz_utilidade.columns]
+    matriz_utilidade.to_csv("Processamento/nova_matriz_utilidade.csv", index=False)
+    print("Colunas normalizadas em nova_matriz_utilidade.csv:", matriz_utilidade.columns.tolist())
+
+    matriz_utilidade_final = pd.read_csv("Processamento/nova_matriz_utilidade.csv", usecols=colunas_proximas)
+    matriz_utilidade_final.to_csv("Processamento/matriz_utilidade_final.csv", index=False)
+    recomendacoes = recomendar_para_novo_usuario(matriz_utilidade_final, top_n=3)
+    
+    print("Colunas do CSV:", matriz_utilidade.columns.tolist())
+    print("Colunas_proximas:", colunas_proximas)
+
+    df_proximas['chave'] = (df_proximas['Mercado'].str.strip() + ' ' + df_proximas['Endereço'].str.strip()).apply(normalize_str)
+    recomendacoes['nome_mercado'] = recomendacoes['nome_mercado'].apply(normalize_str)
+
+    print("Chaves em df_proximas:")
+    print(df_proximas['chave'].unique())
+    print("Mercados recomendados:")
+    print(recomendacoes['nome_mercado'].unique())
+
+    mercados_recomendados = []
+    for idx in recomendacoes["nome_mercado"].index:
+        mercado = recomendacoes.iloc[idx]
+        df_mercado = df_proximas[df_proximas['chave'] == mercado['nome_mercado']]
+        if not df_mercado.empty:
+            info = df_mercado.iloc[0]
+            mercados_recomendados.append({
+                "Nome": mercado['nome_mercado'].title(),
+                "Latitude": info['Latitude'],
+                "Longitude": info['Longitude'],
+                "Distance_km": info['Distance_km']
+            })
+        else:
+            print(f"[AVISO] Mercado '{mercado['nome_mercado']}' não encontrado em df_proximas.")
+    return mercados_recomendados
 
 def get_coordinates(address: str) -> tuple[float, float] | None:
     """
@@ -86,7 +180,7 @@ def main() -> None:
 
     # Carregar base de dados dos mercados
     try:
-        df = pd.read_csv("coordenadas_associacoes_df.csv")
+        df = pd.read_csv("Processamento/coordenadas_associacoes_df.csv")
     except FileNotFoundError:
         print("[Erro] Arquivo 'coordenadas_associacoes_df.csv' não encontrado.")
         return
@@ -132,17 +226,17 @@ def main() -> None:
 
     # Atualizar matriz de utilidade
     try:
-        matriz_utilidade = pd.read_csv("matriz_utilidade.csv")
+        matriz_utilidade = pd.read_csv("Processamento/matriz_utilidade.csv")
     except FileNotFoundError:
         print("[Erro] Arquivo 'matriz_utilidade.csv' não encontrado.")
         return
 
     matriz_utilidade.loc[len(matriz_utilidade)] = linha_novo_usuario
-    matriz_utilidade.to_csv("nova_matriz_utilidade.csv", index=False)
+    matriz_utilidade.to_csv("Processamento/nova_matriz_utilidade.csv", index=False)
 
     # Manter apenas mercados próximos
-    matriz_utilidade_final = pd.read_csv("nova_matriz_utilidade.csv", usecols=indices_proximos)
-    matriz_utilidade_final.to_csv("matriz_utilidade_final.csv", index=False)
+    matriz_utilidade_final = pd.read_csv("Processamento/nova_matriz_utilidade.csv", usecols=indices_proximos)
+    matriz_utilidade_final.to_csv("Processamento/matriz_utilidade_final.csv", index=False)
 
     # Gerar recomendações
     recomendacoes = recomendar_para_novo_usuario(matriz_utilidade_final, top_n=3)

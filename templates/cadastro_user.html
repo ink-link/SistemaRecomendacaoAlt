@@ -39,6 +39,9 @@
                 </div>
             {% endfor %}
         </div>
+        <div>
+            <input type="checkbox" id="select_all_produtos"> <strong>Selecionar todos</strong>
+        </div>
         
         <label for="produtos_organicos">Prefere produtos orgânicos?</label>
         <input type="checkbox" name="produtos_organicos" value="sim">
@@ -88,6 +91,26 @@
 
             marker = L.marker([lat, lng]).addTo(map);
         });
+    </script>
+
+    <script>
+    document.getElementById('select_all_produtos').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('input[name="preferencias"]');
+        for (const cb of checkboxes) {
+            cb.checked = this.checked;
+        }
+    });
+    </script>
+
+    <script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const lat = document.getElementById('latitude').value;
+        const lon = document.getElementById('longitude').value;
+        if (!lat || !lon) {
+            alert('Por favor, selecione sua localização no mapa antes de registrar.');
+            e.preventDefault();
+        }
+    });
     </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from config import ITENS_DISPONIVEIS, SAZONALIDADE, MERCADOS
+from Processamento.config import ITENS_DISPONIVEIS, SAZONALIDADE, MERCADOS
 
 
 def gerar_matriz_usuario_item(mes=5, percentual_organico=0.3, num_usuarios=5000):
@@ -49,7 +49,7 @@ def gerar_matriz_usuario_item(mes=5, percentual_organico=0.3, num_usuarios=5000)
     usuario_item["Organico"] = organico
 
     usuario_item = usuario_item.round(2)
-    usuario_item.to_csv("usuario_item.csv", index=False)
+    usuario_item.to_csv("Processamento/usuario_item.csv", index=False)
 
     print("Matriz de usuário x item salva com sucesso.")
 
@@ -93,15 +93,15 @@ def gerar_matriz_item_mercado(mes):
     # Adiciona linha 'Organico' com flag por mercado
     item_mercado.loc["Organico"] = org_flag
     item_mercado = item_mercado.round(2)
-    item_mercado.to_csv("item_mercado.csv", index=True)
+    item_mercado.to_csv("Processamento/item_mercado.csv", index=True)
 
     print("Matriz item x mercado salva com sucesso.")
 
 
 def gerar_matriz_utilidade(
-    path_usuario_item="usuario_item.csv",
-    path_item_mercado="item_mercado.csv",
-    path_saida="matriz_utilidade.csv"
+    path_usuario_item="Processamento/usuario_item.csv",
+    path_item_mercado="Processamento/item_mercado.csv",
+    path_saida="Processamento/matriz_utilidade.csv"
 ):
     """
     Gera a matriz de utilidade combinando usuários, itens e mercados.
@@ -121,8 +121,8 @@ def gerar_matriz_utilidade(
     -----
     Salva o arquivo 'matriz_utilidade.csv' com os pesos de utilidade por usuário e mercado.
     """
-    user_item = pd.read_csv(path_usuario_item, header=None).iloc[1:].reset_index(drop=True)
-    item_mercado = pd.read_csv(path_item_mercado, header=None).iloc[1:, 1:].reset_index(drop=True)
+    user_item = pd.read_csv(path_usuario_item)
+    item_mercado = pd.read_csv(path_item_mercado, index_col=0)
 
     usuario_organico = user_item.iloc[:, -1].astype(float)
     mercado_organico = item_mercado.iloc[-1, :].astype(float)
@@ -130,6 +130,9 @@ def gerar_matriz_utilidade(
     usuario_item_sem_org = user_item.iloc[:, :-1].astype(float)
     item_mercado_sem_org = item_mercado.iloc[:-1, :].astype(float)
 
+    itens_comuns = usuario_item_sem_org.columns.intersection(item_mercado_sem_org.index)
+    usuario_item_sem_org = usuario_item_sem_org[itens_comuns]
+    item_mercado_sem_org = item_mercado_sem_org.loc[itens_comuns]
     # Produto matricial: (usuários x itens) x (itens x mercados)
     matriz_utilidade = usuario_item_sem_org @ item_mercado_sem_org
 
@@ -147,7 +150,7 @@ def calcular_utilidade_novo_usuario(
     itens_preferidos,
     organico,
     mes,
-    path_item_mercado="item_mercado.csv"
+    path_item_mercado="Processamento/item_mercado.csv"
 ):
     """
     Calcula a utilidade de um novo usuário com base em itens preferidos e preferência por produtos orgânicos.
