@@ -1,0 +1,5 @@
+id,nome,email,senha,dist_max_km,preferencias,latitude,longitude
+2,ana,teste2@gmail.com,123,1.0,mandioca,-14.867814429952979,-46.09863281250001
+3,leo,teste3@gmail.com,123,5.0,mandioca,-18.737305229764665,-48.3837890625
+4,aggds,teste4@gmail.com,123,4.0,mandioca,-14.101948748690008,-50.4931640625
+5,gio2,ink.link2017@gmail.com,123,3.0,"alface,tomate",-10.150042579964852,-59.63378906250001

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Mapa Interativo</title>
+    <style>iframe { width: 100%; height: 600px; border: none; }</style>
+</head>
+<body>
+    <h2>Mapa com Produtores Locais</h2>
+    <iframe src="{{ url_for('static', filename='mapas/mapa.html') }}"></iframe>
+</body>
+</html>

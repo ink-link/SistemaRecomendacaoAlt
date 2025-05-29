@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Cadastro de Usuário</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 300px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h2>Cadastro de Usuário</h2>
+    <form method="POST" action="/registrar">
+        <label for="nome">Nome:</label>
+        <input type="text" name="nome" required>
+
+        <label for="dist_max_km">Distância máxima preferida (em km):</label>
+        <input type="number" name="dist_max_km" required>
+
+        <label for="data_preferencia">Data preferida para a entrega:</label>
+        <input type="date" name="data_preferencia" required>
+
+        <label for="preferencias">Preferências de produtos:</label>
+        <div class="checkbox-container">
+            {% for produto in [
+                'Alface', 'Mandioca', 'Tomate', 'Repolho', 'Batata', 'Cebola', 'Couve', 'Chuchu', 'Morango', 'Pimentão',
+                'Brócolis', 'Abóbora', 'Berinjela', 'Beterraba', 'Pepino', 'Cenoura', 'Quiabo', 'Agrião', 'Jiló', 'Gengibre',
+                'Abacate', 'Goiaba', 'Banana', 'Limão', 'Tangerina', 'Maracujá', 'Manga', 'Lichia', 'Uva', 'Atemóia', 'Cajamanga',
+                'Graviola', 'Coco', 'Pitaia', 'Mamão'
+            ] %}
+                <div class="checkbox-item">
+                    <input type="checkbox" name="preferencias" value="{{ produto }}"> {{ produto }}
+                </div>
+            {% endfor %}
+        </div>
+        
+        <label for="produtos_organicos">Prefere produtos orgânicos?</label>
+        <input type="checkbox" name="produtos_organicos" value="sim">
+
+        <label for="endereco">Endereço:</label>
+        <input type="text" name="endereco" id="endereco">
+
+        <label for="map">Clique no mapa para escolher sua localização:</label>
+        <div id="map"></div>
+
+        <input type="hidden" name="latitude" id="latitude">
+        <input type="hidden" name="longitude" id="longitude">
+
+        <button type="submit">Registrar</button>
+    </form>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="mensagem">
+          {% for message in messages %}
+            <p>{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([-15.78, -47.93], 4); // Centro aproximado do Brasil
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        let marker;
+
+        map.on('click', function (e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lng;
+
+            if (marker) {
+                map.removeLayer(marker);
+            }
+
+            marker = L.marker([lat, lng]).addTo(map);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+<head>
+  <meta charset="utf-8">
+  <title>Avaliações</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<h2>Avaliações de Usuários</h2>
+<ul>
+  {% for a in avaliacoes %}
+    <li><strong>{{ a.nome_usuario }}</strong> avaliou <em>{{ a.produtor }}</em> com nota {{ a.nota }}:<br>
+    "{{ a.comentario }}"</li><br>
+  {% endfor %}
+</ul>

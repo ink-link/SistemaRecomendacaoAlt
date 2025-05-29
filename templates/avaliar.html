@@ -1,0 +1,22 @@
+<head>
+  <meta charset="utf-8">
+  <title>Avaliar</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<h2>Formulário de Avaliação</h2>
+<form method="POST">
+    <label for="nome">Nome:</label>
+    <input type="text" name="nome" required>
+
+    <label for="produtor">Produtor:</label>
+    <input type="text" name="produtor" required>
+
+    <label for="nota">Nota (0-5):</label>
+    <input type="number" name="nota" min="0" max="5" required>
+
+    <label for="comentario">Comentário:</label>
+    <textarea name="comentario" rows="4" required></textarea>
+
+    <button type="submit">Enviar Avaliação</button>
+</form>
+

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <title>Menu Principal</title>
+</head>
+<body>
+  <h1>Bem-vindo ao Sistema de Recomendação de Produtores Rurais</h1>
+  <nav>
+    <div class="menu-botoes">
+      <form action="{{ url_for('cadastrar_user') }}" method="get">
+          <button type="submit">Recomendações para Você</button>
+      </form>
+
+      <form action="{{ url_for('avaliacoes') }}" method="get">
+          <button type="submit">Ver Avaliações</button>
+      </form>
+
+      <form action="{{ url_for('avaliar') }}" method="get">
+          <button type="submit">Avaliar um Produtor</button>
+      </form>
+
+      <form action="{{ url_for('mapa') }}" method="get">
+          <button type="submit">Ver Mapa Interativo</button>
+      </form>
+    </div>
+
+
+  </nav>
+</body>
+</html>
