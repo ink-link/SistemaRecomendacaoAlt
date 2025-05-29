@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from models import db, Usuario, Avaliacao
 from folium.plugins import MarkerCluster
 from datetime import datetime
+from pandas import pd
 import folium
 import os
 import csv
@@ -50,44 +51,54 @@ def cadastrar_user():
 
 @app.route('/registrar', methods=['POST'])
 def registrar_usuario():
-    nome = request.form['nome']
-    dist_max_km = float(request.form['dist_max_km'])
-    latitude = request.form['latitude']
-    longitude = request.form['longitude']
-    endereco = request.form['endereco']
+    session['nome'] = request.form['nome']
+    session['dist_max_km'] = float(request.form['dist_max_km'])
+    session['latitude'] = request.form['latitude']
+    session['longitude'] = request.form['longitude']
+    session['endereco'] = request.form['endereco']
     preferencias = request.form.getlist('preferencias')
-    preferencias_str = ','.join(preferencias).lower()
-    data_preferencia_str = request.form.get('data_preferencia')  # campo date
+    session['preferencias_str'] = ','.join(preferencias).lower()
+    data_preferencia_str = request.form.get('data_preferencia')
+    session['data_preferencia'] = datetime.strptime(data_preferencia_str, '%Y-%m-%d').date()
     organicos = request.form.get('organicos')
-    prefere_organicos = 1 if organicos == 'sim' else 0
-    
-    data_preferencia = datetime.strptime(data_preferencia_str, '%Y-%m-%d').date()
+    session['prefere_organicos'] = 1 if organicos == 'sim' else 0
 
-    if not nome or not dist_max_km or not latitude or not longitude or not preferencias:
-        flash('Todos os campos devem ser preenchidos.')
-        return redirect(url_for('cadastrar_user'))
+    # usuario = Usuario(
+    #     nome=nome,
+    #     preferencias=preferencias_str,
+    #     latitude=latitude,
+    #     longitude=longitude,
+    #     endereco=endereco,
+    #     dist_max_km=dist_max_km,
+    #     data_preferencia=data_preferencia,
+    #     prefere_organicos=prefere_organicos
+    # )
 
-    usuario = Usuario(
-        nome=nome,
-        preferencias=preferencias_str,
-        latitude=latitude,
-        longitude=longitude,
-        endereco=endereco,
-        dist_max_km=dist_max_km,
-        data_preferencia=data_preferencia,
-        prefere_organicos=prefere_organicos
-    )
-
-    db.session.add(usuario)
-    db.session.commit()
+    # db.session.add(usuario)
+    # db.session.commit()
 
     # print("Escrevendo no CSV:", usuario.id, usuario.nome)
     # caminho_csv = os.path.join(os.path.dirname(__file__), 'users.csv')
     # salvar_usuario_csv(usuario)
 
     flash('Registro realizado!', 'success')
-    return redirect(url_for('mapa', usuario_id=usuario.id))
+    return redirect(url_for('mapa'))
 
+@app.route('/recomendacoes')
+def recomendacoes():
+    # Dados do usuário
+    nome = session.get('nome')
+    dist_max_km = session.get('dist_max_km')
+    preferencias = session.get('preferencias')
+    organico = session.get('organico')
+    endereco = session.get('endereco')
+    latitude = session.get('latitude')
+    longitude = session.get('longitude')
+    mes_atual = pd.Timestamp.now().month
+
+    return render_template("recomendacoes.html",
+                           mercados=df_recomendados.to_dict(orient="records"),
+                           lat=latitude, lon=longitude)
 
 @app.route('/mapa')
 def mapa():    

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recomendações</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>#map { height: 500px; }</style>
+</head>
+<body>
+    <h2>Mercados Recomendados</h2>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([{{ lat }}, {{ lon }}], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // Marcador do usuário
+        L.marker([{{ lat }}, {{ lon }}]).addTo(map).bindPopup("Sua localização").openPopup();
+
+        {% for mercado in mercados %}
+            L.marker([{{ mercado['Latitude'] }}, {{ mercado['Longitude'] }}])
+              .addTo(map)
+              .bindPopup("{{ mercado['Nome'] }}<br>Distância: {{ '%.1f'|format(mercado['Distance_km']) }} km");
+        {% endfor %}
+    </script>
+</body>
+</html>
