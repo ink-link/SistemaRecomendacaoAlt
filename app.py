@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from models import db, Usuario, Avaliacao
 from folium.plugins import MarkerCluster
 from datetime import datetime
-from pandas import pd
+import pandas as pd
 import folium
 import os
 import csv
@@ -97,7 +97,7 @@ def recomendacoes():
     mes_atual = pd.Timestamp.now().month
 
     return render_template("recomendacoes.html",
-                           mercados=df_recomendados.to_dict(orient="records"),
+                           #mercados=df_recomendados.to_dict(orient="records"),
                            lat=latitude, lon=longitude)
 
 @app.route('/mapa')
