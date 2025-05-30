@@ -30,6 +30,10 @@ def index():
 
 @app.route('/avaliar', methods=['GET', 'POST'])
 def avaliar():
+    # Carrega os produtores do CSV
+    df = pd.read_csv("Processamento/coordenadas_associacoes_df.csv")
+    produtores = sorted((df['Mercado'].str.strip() + " - " + df['Endereço'].str.strip()).unique())
+
     if request.method == 'POST':
         nome = request.form['nome']
         produtor = request.form['produtor']
@@ -39,10 +43,20 @@ def avaliar():
         db.session.add(avaliacao)
         db.session.commit()
         return redirect(url_for('avaliacoes'))
-    return render_template('avaliar.html')
+    return render_template('avaliar.html', produtores=produtores)
 
 @app.route('/avaliacoes')
 def avaliacoes():
+    if request.method == 'POST':
+        nome = request.form['nome']
+        produtor = request.form['produtor']
+        nota = int(request.form['nota'])
+        comentario = request.form['comentario']
+        avaliacao = Avaliacao(nome_usuario=nome, produtor=produtor, nota=nota, comentario=comentario)
+        db.session.add(avaliacao)
+        db.session.commit()
+        return redirect('/')
+    
     todas = Avaliacao.query.all()
     return render_template('avaliacoes.html', avaliacoes=todas)
 

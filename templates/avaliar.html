@@ -9,7 +9,12 @@
     <input type="text" name="nome" required>
 
     <label for="produtor">Produtor:</label>
-    <input type="text" name="produtor" required>
+    <select name="produtor" required>
+        <option value="" disabled selected>Selecione um produtor</option>
+        {% for p in produtores %}
+            <option value="{{ p }}">{{ p }}</option>
+        {% endfor %}
+    </select>
 
     <label for="nota">Nota (0-5):</label>
     <input type="number" name="nota" min="0" max="5" required>

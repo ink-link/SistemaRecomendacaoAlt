@@ -54,6 +54,17 @@ button {
     font-size: 16px;
 }
 
+select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #fff;
+    font-family: Arial, sans-serif;
+}
+
 .menu-botoes {
     max-width: 400px;
     margin: 0 auto;
