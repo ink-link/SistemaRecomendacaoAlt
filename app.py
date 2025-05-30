@@ -28,12 +28,8 @@ with app.app_context():
 def index():
     return render_template('index.html')
 
-@app.route('/avaliar')
+@app.route('/avaliar', methods=['GET', 'POST'])
 def avaliar():
-    return render_template('avaliar.html')
-
-@app.route('/avaliacoes')
-def avaliacoes():
     if request.method == 'POST':
         nome = request.form['nome']
         produtor = request.form['produtor']
@@ -42,8 +38,11 @@ def avaliacoes():
         avaliacao = Avaliacao(nome_usuario=nome, produtor=produtor, nota=nota, comentario=comentario)
         db.session.add(avaliacao)
         db.session.commit()
-        return redirect('/')
-    
+        return redirect(url_for('avaliacoes'))
+    return render_template('avaliar.html')
+
+@app.route('/avaliacoes')
+def avaliacoes():
     todas = Avaliacao.query.all()
     return render_template('avaliacoes.html', avaliacoes=todas)
 
